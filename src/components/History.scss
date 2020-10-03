@@ -1,0 +1,43 @@
+.historycontainer {
+  padding: 20px;
+  height: 590px;
+  width: 300px;
+  background: #9f9f9f;
+  overflow-y: auto;
+  position: fixed;
+  left: 0;
+  top: 0;
+  display: none;
+  z-index: 1;
+  transition: 0.5s;
+}
+.historyheader {
+  font-size: 35px;
+  color: white;
+  text-align: right;
+  display: inline-block;
+}
+.historyline {
+  display: flex;
+  flex-direction: column;
+}
+
+.historycalculation {
+  font-size: 35px;
+  color: #d4d4d2;
+  margin-left: auto;
+}
+.historyresult {
+  font-size: 50px;
+  color: #505050;
+  font-weight: 500;
+  margin-left: auto;
+}
+
+.historyclosebtn {
+  position: absolute;
+  top: 15px;
+  right: 25px;
+  font-size: 36px;
+  cursor: pointer;
+}
