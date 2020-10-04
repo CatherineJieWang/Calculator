@@ -1,13 +1,17 @@
+
+/**
+ * todo: add useopen, add test, add scientific logic
+ */
 class Calculate {
   constructor() {
-    this.number = "";
+    this.currentNumber = "";
     this.previousInput = null;
     this.previousNumber = null;
     this.previousOperation = null;
-    this.repeatNumber = null;
-    this.repeatOperation = null;
+    this.reuseNumber = null;
+    this.reuseOperation = null;
     this.clearable = false;
-    this.OperationEnum = {
+    this.OperationSet = {
       addition: "+",
       subtraction: "-",
       multiplication: "x",
@@ -31,117 +35,129 @@ class Calculate {
     this.clearable = true;
 
     if (this.isOperation(this.previousInput)) {
-      this.number = "";
+      this.currentNumber = "";
     }
 
-    if (input === "." && this.containDecimalPoint(this.number)) {
-      return this.number;
+    if (input === "." && this.containDecimalPoint(this.currentNumber)) {
+      return this.currentNumber;
     }
 
-    if (input === "." && this.number === "") {
-      this.number = "0.";
-      return this.number;
+    if (input === "." && this.currentNumber === "") {
+      this.currentNumber = "0.";
+      return this.currentNumber;
     }
 
-    this.number += input;
+    this.currentNumber += input;
 
     this.previousInput = input;
 
-    return this.removeZero(this.number);
+    return this.removeZero(this.currentNumber);
   }
 
   // Handle all operation other than digit inputs.
   handleOperationInput(input, updateLocal) {
     if (
-      input === this.OperationEnum.addition ||
-      input === this.OperationEnum.subtraction ||
-      input === this.OperationEnum.multiplication ||
-      input === this.OperationEnum.division
+      input === this.OperationSet.addition ||
+      input === this.OperationSet.subtraction ||
+      input === this.OperationSet.multiplication ||
+      input === this.OperationSet.division
     ) {
       return this.handleBaiscMathOperation(input);
     }
 
-    if (input === this.OperationEnum.percentage) {
+    if (input === this.OperationSet.percentage) {
       return this.handlePercentageOperation();
     }
 
-    if (input === this.OperationEnum.sign) {
+    if (input === this.OperationSet.sign) {
       return this.handleSignOperation();
     }
 
-    if (input === this.OperationEnum.allClear) {
+    if (input === this.OperationSet.allClear) {
       return this.handleAllClearOperation();
     }
 
-    if (input === this.OperationEnum.clear) {
+    if (input === this.OperationSet.clear) {
       return this.handleClearOperation();
     }
 
-    if (input === this.OperationEnum.equal) {
+    if (input === this.OperationSet.equal) {
       return this.handleEqualOperation(input, updateLocal);
     }
   }
 
   // Only handle basic +, -, /, x operations
   handleBaiscMathOperation(input) {
-    this.repeatNumber = null;
-    this.repeatOperation = null;
+    this.reuseNumber = null;
+    this.reuseOperation = null;
 
     if (this.previousNumber == null) {
-      this.updatePreviousStatus(this.number, input);
+      this.updatePreviousStatus(this.currentNumber, input);
 
-      return this.number;
+      return this.currentNumber;
     } else {
       let temp = this.previousInput;
       this.previousInput = input;
 
       if (
         temp !== input &&
-        this.previousOperation !== this.OperationEnum.equal &&
+        this.previousOperation !== this.OperationSet.equal &&
         temp !== "="
       ) {
-        if (this.previousOperation === this.OperationEnum.addition) {
-          this.number = this.add(this.previousNumber, this.number);
+        if (this.previousOperation === this.OperationSet.addition) {
+          this.currentNumber = this.add(
+            this.previousNumber,
+            this.currentNumber
+          );
         }
-        if (this.previousOperation === this.OperationEnum.subtraction) {
-          this.number = this.subtract(this.previousNumber, this.number);
+        if (this.previousOperation === this.OperationSet.subtraction) {
+          this.currentNumber = this.subtract(
+            this.previousNumber,
+            this.currentNumber
+          );
         }
-        if (this.previousOperation === this.OperationEnum.multiplication) {
-          this.number = this.muliply(this.previousNumber, this.number);
+        if (this.previousOperation === this.OperationSet.multiplication) {
+          this.currentNumber = this.muliply(
+            this.previousNumber,
+            this.currentNumber
+          );
         }
-        if (this.previousOperation === this.OperationEnum.division) {
-          this.number = this.divide(this.previousNumber, this.number);
+        if (this.previousOperation === this.OperationSet.division) {
+          this.currentNumber = this.divide(
+            this.previousNumber,
+            this.currentNumber
+          );
         }
 
-        this.updatePreviousStatus(this.number, input);
+        this.updatePreviousStatus(this.currentNumber, input);
 
-        return this.number;
+        return this.currentNumber;
       } else {
-        this.updatePreviousStatus(this.number, input);
+        this.updatePreviousStatus(this.currentNumber, input);
 
-        return this.number;
+        return this.currentNumber;
       }
     }
   }
 
   handlePercentageOperation() {
-    if (this.number === "") {
-      this.number = "0";
+    if (this.currentNumber === "") {
+      this.currentNumber = "0";
     }
 
-    this.number = this.percentage(this.number);
+    this.currentNumber = this.percentage(this.currentNumber);
 
-    return this.number;
+    return this.currentNumber;
   }
 
   handleSignOperation() {
-    if (this.number === "") {
-      this.number = "0";
+    if (this.currentNumber === "") {
+      this.currentNumber = "0";
     }
 
-    this.number = this.changeSign(this.number);
+    this.currentNumber = this.changeSign(this.currentNumber);
 
-    return this.number;
+    return this.currentNumber;
   }
 
   handleAllClearOperation() {
@@ -154,91 +170,100 @@ class Calculate {
 
   // Paramter operation is one of add, subtract, multiply or divide
   perform(operation) {
-    if (this.repeatNumber !== null) {
-      this.number = operation(this.number, this.repeatNumber);
+    if (this.reuseNumber !== null) {
+      this.currentNumber = operation(this.currentNumber, this.reuseNumber);
     } else {
-      this.repeatNumber = this.number;
-      this.number = operation(this.previousNumber, this.number);
+      this.reuseNumber = this.currentNumber;
+      this.currentNumber = operation(this.previousNumber, this.currentNumber);
     }
   }
 
   handleEqualOperation(input, updateLocal) {
     if (this.previousNumber == null) {
-      this.updatePreviousStatus(this.number, input);
+      this.updatePreviousStatus(this.currentNumber, input);
 
-      return this.number;
+      return this.currentNumber;
     } else {
       this.previousInput = input;
 
       if (
-        this.previousOperation !== this.OperationEnum.equal &&
-        input === this.OperationEnum.equal
+        this.previousOperation !== this.OperationSet.equal &&
+        input === this.OperationSet.equal
       ) {
-        let temp = this.number;
-        let tempstr1 = "";
-        if (this.previousOperation === this.OperationEnum.addition) {
+        let temp = this.currentNumber;
+        let tempstrequal = "";
+        if (this.previousOperation === this.OperationSet.addition) {
           this.perform(this.add);
         }
-        if (this.previousOperation === this.OperationEnum.subtraction) {
+        if (this.previousOperation === this.OperationSet.subtraction) {
           this.perform(this.subtract);
         }
-        if (this.previousOperation === this.OperationEnum.multiplication) {
+        if (this.previousOperation === this.OperationSet.multiplication) {
           this.perform(this.muliply);
         }
-        if (this.previousOperation === this.OperationEnum.division) {
+        if (this.previousOperation === this.OperationSet.division) {
           this.perform(this.divide);
         }
-        tempstr1 =
-          tempstr1 +
+        tempstrequal =
+          tempstrequal +
           this.previousNumber +
           " " +
           this.previousOperation +
           " " +
-          this.repeatNumber +
+          this.reuseNumber +
           " " +
           input +
           " " +
-          this.number;
-        updateLocal(tempstr1);
-        this.repeatNumber = temp;
-        this.repeatOperation = this.previousOperation;
+          this.currentNumber;
+        updateLocal(tempstrequal);
+        this.reuseNumber = temp;
+        this.reuseOperation = this.previousOperation;
         this.previousInput = input;
         this.previousOperation = input;
-        return this.number;
+        return this.currentNumber;
       } else {
-        let temp = this.number;
+        let temp = this.currentNumber;
 
-        if (this.repeatNumber != null) {
-          if (this.repeatOperation === this.OperationEnum.addition) {
-            this.number = this.add(this.number, this.repeatNumber);
+        if (this.reuseNumber != null) {
+          if (this.reuseOperation === this.OperationSet.addition) {
+            this.currentNumber = this.add(this.currentNumber, this.reuseNumber);
           }
-          if (this.repeatOperation === this.OperationEnum.subtraction) {
-            this.number = this.subtract(this.number, this.repeatNumber);
+          if (this.reuseOperation === this.OperationSet.subtraction) {
+            this.currentNumber = this.subtract(
+              this.currentNumber,
+              this.reuseNumber
+            );
           }
-          if (this.repeatOperation === this.OperationEnum.multiplication) {
-            this.number = this.muliply(this.number, this.repeatNumber);
+          if (this.reuseOperation === this.OperationSet.multiplication) {
+            this.currentNumber = this.muliply(
+              this.currentNumber,
+              this.reuseNumber
+            );
           }
-          if (this.repeatOperation === this.OperationEnum.division) {
-            this.number = this.divide(this.number, this.repeatNumber);
+          if (this.reuseOperation === this.OperationSet.division) {
+            this.currentNumber = this.divide(
+              this.currentNumber,
+              this.reuseNumber
+            );
           }
         }
 
         this.updatePreviousStatus(temp, input);
-        let tempstr2 = "";
-        tempstr2 =
-          tempstr2 +
-          this.repeatNumber +
+        let tempstrreuse = "";
+        tempstrreuse =
+          tempstrreuse +
+          this.reuseNumber +
           " " +
-          this.repeatOperation +
+          this.reuseOperation +
           " " +
           this.previousNumber +
           " " +
           this.previousOperation +
           " " +
-          this.number;
-        updateLocal(tempstr2);
+          this.currentNumber;
+        updateLocal(tempstrreuse);
 
-        return this.number;
+        return this.currentNumber;
       }
     }
   }
@@ -260,7 +285,7 @@ class Calculate {
   }
 
   isOperation(input) {
-    return Object.values(this.OperationEnum).includes(input);
+    return Object.values(this.OperationSet).includes(input);
   }
 
   add(previousNumber, number) {
@@ -293,20 +318,20 @@ class Calculate {
     this.previousInput = null;
     this.previousNumber = null;
     this.previousOperation = null;
-    this.repeatNumber = null;
-    this.repeatOperation = null;
+    this.reuseNumber = null;
+    this.reuseOperation = null;
     this.clearable = false;
-    this.number=0;
-    return this.number;
+    this.currentNumber = 0;
+    return this.currentNumber;
   }
 
   allClear() {
-    this.number = "";
+    this.currentNumber = "";
     this.previousInput = null;
     this.previousNumber = null;
     this.previousOperation = null;
-    this.repeatNumber = null;
-    this.repeatOperation = null;
+    this.reuseNumber = null;
+    this.reuseOperation = null;
     this.clearable = false;
     return "0";
   }

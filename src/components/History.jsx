@@ -4,7 +4,7 @@ import "./History.scss";
 export default function History() {
   const Historydata =
     localStorage.getItem("Calculate") &&
-    localStorage.getItem("Calculate").split(",");
+    localStorage.getItem("Calculate").split(",").reverse();
 
   function closeHistory(){
     const curhistory = document.getElementById("history");
